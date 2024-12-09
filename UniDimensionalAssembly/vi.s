@@ -1,7 +1,7 @@
 .data
     #  modif mai tarziu------------------------  ATENTIE ATENTIE ATENTIE ATENTIE ATENTIE
-    a: .space 200
-    n: .long 25
+    a: .space 4096
+    n: .long 1024
     # -----------------------------------------
     q: .long 0
     task: .long 0
