@@ -1,0 +1,15 @@
+vector sizes?
+corectitudinea algoritmului
+poate ajuta exemplul restrans de la mat 2d pt verificare
+
+
+
+
+afisarea trb facuta cu %d sau merge si %ld
+
+
+
+Add 1d trimis mail
+se afiseaza doar disierele adaugate acm?
+
+
