@@ -1,9 +1,9 @@
 .data
     # =============================== BIDIMENSIONAL!!!! ===================================================================
     #  modif mai tarziu------------------------  ATENTIE ATENTIE ATENTIE ATENTIE ATENTIE
-    a: .space 200
-    n: .long 25
-    latura: .long 5
+    a: .space 4194304
+    n: .long 1048576
+    latura: .long 1024
     # -----------------------------------------
     q: .long 0
     task: .long 0
@@ -596,11 +596,8 @@ et_adter_the_open:
     int $0x80
 
     movl 20(%ecx),%eax 
-    movl %eax,desc_size             # nu e cam mare valoarea?
+    movl %eax,desc_size             
 
-pushl desc_size
-call testare
-popl %eax 
     # close 
     movl $6,%eax
     int $0x80
@@ -639,9 +636,6 @@ ret
 
 main:
 
-    call F_Concrete
-    jmp et_exit
-# TEST
     call initializare_sir                      # daca 100% val initiala a sirului e 0  -> sterge linia asta!
     pushl $q
     call citire
