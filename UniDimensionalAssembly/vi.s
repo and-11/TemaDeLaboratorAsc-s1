@@ -296,10 +296,9 @@ etdebug:
         popl %eax
         popl %eax
         popl %eax
-        jmp Add_gata
 
-pushl a_dr
-pushl a_st
+pushl a_dr                              # pt a schimba la loc  afisarea mut abucata asta *
+pushl a_st  
 pushl desc
 pushl $af_fisier
 call printf
@@ -307,7 +306,8 @@ popl %eax
 popl %eax
 popl %eax
 popl %eax
-call apel_flush
+call apel_flush                         #  *
+        jmp Add_gata
 
 
         Add_skip_gasit:
@@ -317,13 +317,13 @@ call apel_flush
     jne Add_parcurgere
 
 
-pushl $eroare_add
+pushl $eroare_add               # si sterge bucata asta &
 call printf
 popl %eax
-call apel_flush
+call apel_flush                 # &
 
     Add_gata:
-
+                                    # * aici
 
     popl %ebx
 ret
