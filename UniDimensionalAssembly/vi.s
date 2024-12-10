@@ -13,6 +13,7 @@
     af_fisier: .asciz "%d: (%d, %d)\n"
     af_get: .asciz "(%d, %d)\n"
     c_long: .asciz "%ld"
+    eroare_add: .asciz "(0, 0)\n"
 
     # var ocazionale
     desc: .long 0
@@ -297,24 +298,32 @@ etdebug:
         popl %eax
         jmp Add_gata
 
+pushl a_dr
+pushl a_st
+pushl desc
+pushl $af_fisier
+call printf
+popl %eax
+popl %eax
+popl %eax
+popl %eax
+call apel_flush
+
+
         Add_skip_gasit:
 
     inc %ebx
     cmp n,%ebx
     jne Add_parcurgere
 
+
+pushl $eroare_add
+call printf
+popl %eax
+call apel_flush
+
     Add_gata:
 
-    pushl a_dr
-    pushl a_st
-    pushl desc
-    pushl $af_fisier
-    call printf
-    popl %eax
-    popl %eax
-    popl %eax
-    popl %eax
-    call apel_flush
 
     popl %ebx
 ret
