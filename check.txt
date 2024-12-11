@@ -1,15 +1,10 @@
 vector sizes?
-corectitudinea algoritmului
-poate ajuta exemplul restrans de la mat 2d pt verificare
-
-
 
 
 afisarea trb facuta cu %d sau merge si %ld
 
 
-
-Add 1d trimis mail
-se afiseaza doar disierele adaugate acm?
+nu cumva fisierele la 2d sa ocupe sub 2 locuri
 
 
+cand nu incape un fisier la add se afiseaza 0 0 sau descriptor0 0

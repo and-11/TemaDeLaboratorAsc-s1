@@ -575,6 +575,8 @@ ret
 F_Concrete:
     pushl %ebx
 
+call rand_nou
+
     pushl $path_concrete
     call citire_string
     popl %eax
@@ -588,6 +590,10 @@ F_Concrete:
 
 et_adter_the_open:
     movl %eax,desc
+    
+pushl desc
+call testare 
+popl %eax
 
     
     movl $108,%eax
@@ -597,19 +603,22 @@ et_adter_the_open:
 
     movl 20(%ecx),%eax 
     movl %eax,desc_size             
-
+/*
     # close 
     movl $6,%eax
     int $0x80
-    
+*/
     # modif val desc (mod) + apel call
     movl desc,%eax
     xorl %edx,%edx
     movl $256,%ecx
     div %ecx
     movl %edx,desc
-    inc desc # <---------------------------------------------------------   slaBA SANSA sa fie pb aici. pe teams zice +1, in cerinta nu precizeaza
+    inc desc # <----------- ----------------------------------------------   slaBA SANSA sa fie pb aici. pe teams zice +1, in cerinta nu precizeaza
 
+pushl desc_size
+call testare 
+popl %eax
 
 #                  Eliminare elemente repetate
 
@@ -624,10 +633,10 @@ et_adter_the_open:
     cmp n,%ebx
     jne concrete_verificare_repetare
 
-
     call Add_Element
     concrete_skip:                  # afisare (0,0)(0,0)(0,0) in caz de skip ?? ?
 
+call rand_nou
 
     popl %ebx
 ret
