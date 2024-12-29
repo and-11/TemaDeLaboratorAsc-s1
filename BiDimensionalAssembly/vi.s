@@ -20,6 +20,7 @@
     af_get_mijloc: .asciz ", "
     af_get_dreapta: .asciz ")\n"
 
+    af_conc: .asciz "(%d, %d)\n"
 
     af_get: .asciz "(%d, %d)\n"
     c_long: .asciz "%ld"
@@ -30,6 +31,7 @@
     # var ocazionale
     path_concrete: .asciz ""
     desc: .long 0
+    file_desc: .long 0
     desc_size: .long 0
     start: .long 0
     a_st: .long 0
@@ -575,8 +577,6 @@ ret
 F_Concrete:
     pushl %ebx
 
-call rand_nou
-
     pushl $path_concrete
     call citire_string
     popl %eax
@@ -590,10 +590,7 @@ call rand_nou
 
 et_adter_the_open:
     movl %eax,desc
-    
-pushl desc
-call testare 
-popl %eax
+    movl %eax,file_desc
 
     
     movl $108,%eax
@@ -603,10 +600,12 @@ popl %eax
 
     movl 20(%ecx),%eax 
     movl %eax,desc_size             
-/*
     # close 
     movl $6,%eax
+    movl file_desc,%ebx
     int $0x80
+
+/*
 */
     # modif val desc (mod) + apel call
     movl desc,%eax
@@ -614,16 +613,30 @@ popl %eax
     movl $256,%ecx
     div %ecx
     movl %edx,desc
-    inc desc # <----------- ----------------------------------------------   slaBA SANSA sa fie pb aici. pe teams zice +1, in cerinta nu precizeaza
+    inc desc 
+    
+    # conversie in kb
+    xorl %edx,%edx
+    movl desc_size,%eax
+    movl $1024,%ebx
+    div %ebx
+    movl %eax,desc_size
 
-pushl desc_size
-call testare 
-popl %eax
+  
+  
+    pushl desc_size
+    pushl desc
+    pushl $af_conc
+    call printf
+    popl %eax
+    popl %eax
+    popl %eax
+    call apel_flush
 
-#                  Eliminare elemente repetate
+# /home/jeff/Downloads/17kb_file.txt
 
-# /home/jeff/Downloads/8bytes_file.txt
    
+#                  Eliminare elemente repetate
     xorl %ebx,%ebx
     concrete_verificare_repetare:
         movl a(,%ebx,4),%eax
@@ -635,8 +648,6 @@ popl %eax
 
     call Add_Element
     concrete_skip:                  # afisare (0,0)(0,0)(0,0) in caz de skip ?? ?
-
-call rand_nou
 
     popl %ebx
 ret
