@@ -29,10 +29,13 @@
     af_linie_coloana: .asciz "(%d, %d)"
 
     # var ocazionale
-    path_concrete: .asciz ""
+    path_concrete: .asciz "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     desc: .long 0
+    path_folder: .asciz "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"                      # schimba pozitia wtfffff
     file_desc: .long 0
     desc_size: .long 0
+    desc_folder: .long 0
+    folder_size: .long 0
     start: .long 0
     a_st: .long 0
     a_dr: .long 0
@@ -43,6 +46,11 @@
     rand: .long 0
     # fstat
     f_stat: .space 128 
+    # getdents 
+    getdents_buffer: .space 1024                                # PRE MIC PRE MARE??     
+
+
+
 .text
 
 citire_string:
@@ -184,9 +192,11 @@ rand_nou:
 ret
 
 tst:
+
     pushl q
     call testare
     popl %eax
+
 ret
 
 initializare_sir:
@@ -574,12 +584,8 @@ F_Defragmentation:
     popl %edi                           #   ordinea buna? :)
 ret
 
-F_Concrete:
+Concrete_Element:
     pushl %ebx
-
-    pushl $path_concrete
-    call citire_string
-    popl %eax
 
     # open
     movl $5,%eax
@@ -588,7 +594,6 @@ F_Concrete:
     xorl %edx, %edx
     int $0x80
 
-et_adter_the_open:
     movl %eax,desc
     movl %eax,file_desc
 
@@ -652,6 +657,95 @@ et_adter_the_open:
     popl %ebx
 ret
 
+
+
+F_Concrete:
+   # pusha
+    pushl %ebx
+
+    pushl $path_folder
+    call citire_string
+    popl %eax
+
+# open
+    movl $5,%eax
+    movl $path_folder,%ebx
+    movl $0,%ecx
+    xorl %edx, %edx
+    int $0x80
+    movl %eax,desc_folder
+
+    # getdents
+    movl $141,%eax
+    movl desc_folder,%ebx
+    movl $getdents_buffer, %ecx
+    movl $1024, %edx                
+    int $0x80
+    movl %eax,folder_size
+
+
+
+
+# ebx - pt parcurgere 
+    xorl %ebx,%ebx
+
+    parcurgere_concrete:
+
+pushl %ebx
+call testare
+popl %eax
+    xorl %edx,%edx
+
+    add $8, %ebx # ACUMA SUNTEM LA d_reclen
+    movw getdents_buffer(, %ebx, 1), %dx  
+
+/*
+    cmp $23, %edx
+    jl continue_parcurgere_concrete
+*/
+
+    add $2, %ebx    
+    
+    # aici o sa modif codul
+    push %edx
+    call tst
+    pop %edx
+
+    continue_parcurgere_concrete:
+
+    sub $10,%ebx
+
+    add %edx,%ebx
+    cmp folder_size,%ebx
+    jb parcurgere_concrete    
+
+
+
+/*
+    # close 
+    movl $6,%eax
+    movl desc_folder,%ebx
+    int $0x80
+*/
+#                               /home/jeff/Downloads/kb_files
+    popl %ebx
+  #  popa
+ret                          
+
+
+                                    #               CLOSE FILES?
+                                    #               CLOSE?
+                                                                        #               CLOSE?
+                                                                                                #               CLOSE?
+                                                        #               CLOSE?
+                                    #               CLOSE?
+                                                                        #               CLOSE?
+                                                                                                #               CLOSE?
+                                                        #               CLOSE?
+                                    #               CLOSE?
+                                                                        #               CLOSE?
+                                                                                                #               CLOSE?
+                                                        #               CLOSE?
 .global main
 
 main:
