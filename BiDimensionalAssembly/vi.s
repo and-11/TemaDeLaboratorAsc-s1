@@ -20,7 +20,7 @@
     af_get_mijloc: .asciz ", "
     af_get_dreapta: .asciz ")\n"
 
-    af_conc: .asciz "(%d, %d)\n"
+    af_conc: .asciz "%d\n%d\n"
 
     af_get: .asciz "(%d, %d)\n"
     c_long: .asciz "%ld"
