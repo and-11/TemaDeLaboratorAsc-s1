@@ -11,7 +11,7 @@
     # constane
     test: .asciz "--->  %ld\n"
     af_sir: .asciz "%ld  "
-    
+
     af_fisier_stanga: .asciz "%d: ("
     af_fisier_mijloc: .asciz ", "
     af_fisier_dreapta: .asciz ")\n"
@@ -29,13 +29,18 @@
     af_linie_coloana: .asciz "(%d, %d)"
 
     # var ocazionale
-    path_concrete: .asciz "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    path_concrete: .space 4000
     desc: .long 0
     path_folder: .asciz "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"                      # schimba pozitia wtfffff
     file_desc: .long 0
     desc_size: .long 0
     desc_folder: .long 0
     folder_size: .long 0
+    i_path_folder: .long 0
+    i_nume_fisier: .long 0
+
+    lg_linux_dir: .word 0
+
     start: .long 0
     a_st: .long 0
     a_dr: .long 0
@@ -47,7 +52,7 @@
     # fstat
     f_stat: .space 128 
     # getdents 
-    getdents_buffer: .space 1024                                # PRE MIC PRE MARE??     
+    getdents_buffer: .space 4096                                # PRE MIC PRE MARE??     
 
 
 
@@ -596,8 +601,7 @@ Concrete_Element:
 
     movl %eax,desc
     movl %eax,file_desc
-
-    
+   
     movl $108,%eax
     movl desc,%ebx
     movl $f_stat,%ecx 
@@ -605,13 +609,15 @@ Concrete_Element:
 
     movl 20(%ecx),%eax 
     movl %eax,desc_size             
-    # close 
+    
+    # close
+    /* 
     movl $6,%eax
     movl file_desc,%ebx
     int $0x80
+    */
 
-/*
-*/
+
     # modif val desc (mod) + apel call
     movl desc,%eax
     xorl %edx,%edx
@@ -626,9 +632,14 @@ Concrete_Element:
     movl $1024,%ebx
     div %ebx
     movl %eax,desc_size
-
-  
-  
+/*
+call rand_nou   
+call rand_nou   
+pushl $path_concrete
+call afisare_string
+popl %eax 
+call rand_nou   
+  */
     pushl desc_size
     pushl desc
     pushl $af_conc
@@ -679,43 +690,38 @@ F_Concrete:
     movl $141,%eax
     movl desc_folder,%ebx
     movl $getdents_buffer, %ecx
-    movl $1024, %edx                
+    movl $4096, %edx                
     int $0x80
     movl %eax,folder_size
 
-
-
-
 # ebx - pt parcurgere 
-    xorl %ebx,%ebx
+    xorl %eax,%eax
+    movl %eax,i_path_folder
 
     parcurgere_concrete:
 
-pushl %ebx
-call testare
-popl %eax
+
+    movl i_path_folder,%ebx
     xorl %edx,%edx
-
-    add $8, %ebx # ACUMA SUNTEM LA d_reclen
+    add $8, %ebx 
     movw getdents_buffer(, %ebx, 1), %dx  
+    movw %dx,lg_linux_dir
 
-/*
-    cmp $23, %edx
-    jl continue_parcurgere_concrete
-*/
+    add $2,%ebx 
+    cmpb $46,getdents_buffer(, %ebx, 1)             # 46   =    .
+    je continue_parcurgere_concrete                         # sarim peste fisierele             .   si  ..
 
-    add $2, %ebx    
-    
     # aici o sa modif codul
-    push %edx
-    call tst
-    pop %edx
+    call concatenatenare_strings
+    call Concrete_Element
 
     continue_parcurgere_concrete:
 
-    sub $10,%ebx
+    xorl %edx,%edx
+    movw lg_linux_dir,%dx
 
-    add %edx,%ebx
+    add %edx,i_path_folder            #           orice call NU ma MAI rupe
+    movl i_path_folder,%ebx
     cmp folder_size,%ebx
     jb parcurgere_concrete    
 
@@ -731,6 +737,69 @@ popl %eax
     popl %ebx
   #  popa
 ret                          
+
+concatenatenare_strings:
+    push %ebx
+# path_folder + nume => path_concrete
+    # ebx    - parcurgere - path_concrete   (rez_final)
+    xorl %ebx,%ebx
+    lipire_path_folder:
+        xorl %eax,%eax
+        movb path_folder(, %ebx, 1),%al
+        cmp $0,%eax           # breaktrough !!!!!!!!!               trb pus in al    !!!!!!!!!!!!!!! BINEEE  MAA A A 
+        je terminat_lipit_path_folder
+
+        xorl %eax,%eax
+        movb path_folder(,%ebx,1),%al
+        movb %al,path_concrete(,%ebx,1)    
+        
+        inc %ebx
+        jmp lipire_path_folder
+    terminat_lipit_path_folder:
+
+
+    movb $'/',path_concrete(,%ebx,1)
+    inc %ebx
+
+
+
+    xorl i_path_folder,%eax
+    movl %eax,i_nume_fisier
+    add $10,i_nume_fisier
+
+    lipire_nume_fisier:
+# vf  terminat de parcurs  daca lungime
+        movl i_path_folder,%eax
+        add lg_linux_dir,%eax
+        dec %eax
+        cmp i_nume_fisier,%eax
+        je final_lipire_nume_fisier
+# vf terminat de parcurs daca   adaugam ch NULL.......     
+        xorl %eax,%eax
+        movl i_nume_fisier,%ecx
+        movb getdents_buffer(,%ecx,1),%al
+        cmp $0,%eax
+        je final_lipire_nume_fisier
+
+        xorl %eax,%eax
+        movl i_nume_fisier,%ecx
+        movb getdents_buffer(,%ecx,1),%al
+        movb %al,path_concrete(,%ebx,1)
+        
+        inc %ebx
+        inc i_nume_fisier
+        jmp lipire_nume_fisier
+
+        final_lipire_nume_fisier:
+    
+    movb $0, path_concrete(, %ebx, 1)           
+    inc %ebx    
+
+    pop %ebx
+ret
+
+
+
 
 
                                     #               CLOSE FILES?
